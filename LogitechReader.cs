@@ -306,7 +306,13 @@ public sealed class LogitechReader
             return null;
         }
 
-        return args[0].Trim().ToLowerInvariant() switch
+        string argument = args[0].Trim().ToLowerInvariant();
+        if (argument.StartsWith("--", StringComparison.Ordinal))
+        {
+            argument = argument[2..];
+        }
+
+        return argument switch
         {
             "status" => ThumbWheelCommand.Status,
 
@@ -622,9 +628,11 @@ public sealed class LogitechReader
         Console.WriteLine("Neplatný příkaz.");
         Console.WriteLine();
         Console.WriteLine("Použití:");
-        Console.WriteLine("  dotnet run -- status");
-        Console.WriteLine("  dotnet run -- normal");
-        Console.WriteLine("  dotnet run -- inverted");
+        Console.WriteLine("  MxThumbWheelReader.exe --status");
+        Console.WriteLine("  MxThumbWheelReader.exe --normal");
+        Console.WriteLine("  MxThumbWheelReader.exe --inverted");
+        Console.WriteLine();
+        Console.WriteLine("Příkazy fungují i bez předpony --.");
     }
 
     private static string FormatCommand(ThumbWheelCommand command)

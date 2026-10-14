@@ -6,12 +6,12 @@ Konzolová aplikace pro Windows a .NET 10. Používá HID++ feature `0x2150` pro
 
 ```powershell
 dotnet restore .\MxThumbWheelReader.csproj
-dotnet run --project .\MxThumbWheelReader.csproj -- status
-dotnet run --project .\MxThumbWheelReader.csproj -- normal
-dotnet run --project .\MxThumbWheelReader.csproj -- inverted
+dotnet run --project .\MxThumbWheelReader.csproj -- --status
+dotnet run --project .\MxThumbWheelReader.csproj -- --normal
+dotnet run --project .\MxThumbWheelReader.csproj -- --inverted
 ```
 
-Bez parametru se provede `status`. `normal` a `inverted` mění směr kolečka pouze v případě, že se aktuální hodnota liší. Po zápisu se stav znovu přečte.
+Staženou aplikaci lze spustit například `.\MxThumbWheelReader.exe --status`. Bez parametru se provede `status`. Příkazy fungují i bez předpony `--`. `normal` a `inverted` mění směr kolečka pouze v případě, že se aktuální hodnota liší. Po zápisu se stav znovu přečte.
 
 Při prvním úspěšném čtení aplikace uloží název počítače, VID/PID, název zařízení, HID cestu, index zařízení a aktuální směr do `appsettings.json` vedle spuštěného programu. Při dalším spuštění zkusí tento záznam přednostně; pokud cesta už neplatí, znovu prohledá Logitech HID zařízení. Nové úspěšné čtení záznam aktualizuje.
 
