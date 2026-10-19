@@ -7,7 +7,16 @@ $user = [Security.Principal.WindowsIdentity]::GetCurrent().Name
 $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $taskName = "MxThumbWheelReader-$sid"
 $escapedExe = $exe.Replace("'", "''")
-$command = "& '$escapedExe' --watch; exit `$LASTEXITCODE"
+$command = @"
+`$start = New-Object System.Diagnostics.ProcessStartInfo
+`$start.FileName = '$escapedExe'
+`$start.Arguments = '--watch --hidden'
+`$start.UseShellExecute = `$false
+`$start.CreateNoWindow = `$true
+`$process = [System.Diagnostics.Process]::Start(`$start)
+`$process.WaitForExit()
+exit `$process.ExitCode
+"@
 $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
 $action = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument "-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand $encoded" -WorkingDirectory $PSScriptRoot
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $user

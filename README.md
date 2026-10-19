@@ -32,6 +32,10 @@ První příkaz uloží požadavek i při odpojené myši (v tom případě vrá
 
 Pro ruční hlídání v konzoli spusťte `.\MxThumbWheelReader.exe --watch`; ukončení je Ctrl+C. Pro odstranění automatického spouštění spusťte `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Uninstall-Startup.ps1`.
 
+Od v1.2.1 instalační skript spouští proces bez konzole, takže nemá okno ani položku na hlavním panelu. Volba `--watch --hidden` navíc odpojí konzoli při ručním spuštění; takový proces lze ukončit ve Správci úloh. Pro běžný provoz použijte instalační skript. Hlídání nadále čeká na události Windows bez pravidelných dotazů.
+
+Aktualizace na v1.2.1: ve staré složce spusťte `Uninstall-Startup.ps1`, ruční hlídání ukončete Ctrl+C, nahraďte soubory novým ZIPem (zachovejte svůj `appsettings.json`) a znovu spusťte `Install-Startup.ps1`. Při instalaci do nové složky do ní přeneste svůj `appsettings.json`.
+
 Požadovaný směr je uložen zvlášť v `DesiredDirectionInverted`. Příkaz `--status` ho nepřepíše. Při aktualizaci ze starší verze zvolte jednou `--inverted` nebo `--normal`; stará naměřená hodnota se automaticky nepovažuje za požadavek.
 
 Hlídání reaguje na oznámení Windows o připojení spárovaného Bluetooth zařízení, objevení Logitech HID rozhraní, probuzení počítače a na ruční příkazy programu. Používá DeviceWatcher se stavem System.Devices.Aep.IsConnected pro spárované Bluetooth/BLE endpointy a oznámení Windows o probuzení. Nespouští vyhledávání nespárovaných zařízení ani periodické HID dotazy. Oznámení o jiném spárovaném Bluetooth zařízení může také vyvolat kontrolu uložené myši.

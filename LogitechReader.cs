@@ -32,8 +32,9 @@ public sealed class LogitechReader
 
     public int Run(string[] args)
     {
-        if (args.Length == 1 && args[0].Trim().TrimStart('-').Equals("watch", StringComparison.OrdinalIgnoreCase))
-            return new WatchRunner().Run();
+        if (args.Length is 1 or 2 && args[0].Trim().TrimStart('-').Equals("watch", StringComparison.OrdinalIgnoreCase)
+            && (args.Length == 1 || args[1].Equals("--hidden", StringComparison.OrdinalIgnoreCase)))
+            return new WatchRunner().Run(hidden: args.Length == 2);
         using var mutex = new Mutex(false, @"Local\MxThumbWheelReader.Operation");
         bool acquired = false;
         try
@@ -674,7 +675,7 @@ public sealed class LogitechReader
         Console.WriteLine("  MxThumbWheelReader.exe --status");
         Console.WriteLine("  MxThumbWheelReader.exe --normal");
         Console.WriteLine("  MxThumbWheelReader.exe --inverted");
-        Console.WriteLine("  MxThumbWheelReader.exe --watch");
+        Console.WriteLine("  MxThumbWheelReader.exe --watch [--hidden]");
         Console.WriteLine();
         Console.WriteLine("Příkazy fungují i bez předpony --.");
     }

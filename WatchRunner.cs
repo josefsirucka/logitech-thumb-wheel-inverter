@@ -4,9 +4,16 @@ internal sealed class WatchRunner
 {
     internal const string ChangedEventName = @"Local\MxThumbWheelReader.Changed";
 
-    public int Run()
+    public int Run(bool hidden = false)
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        if (hidden)
+        {
+            // Detach only this process, leaving a caller's terminal intact.
+            if (!FreeConsole()) return 6;
+            Console.SetOut(TextWriter.Null);
+            Console.SetError(TextWriter.Null);
+        }
+        else Console.OutputEncoding = System.Text.Encoding.UTF8;
         using var single = new Mutex(false, @"Local\MxThumbWheelReader.Watch");
         bool owned;
         try { owned = single.WaitOne(0); }
@@ -15,7 +22,7 @@ internal sealed class WatchRunner
         using var stop = new ManualResetEvent(false);
         using var changed = new EventWaitHandle(false, EventResetMode.AutoReset, ChangedEventName);
         ConsoleCancelEventHandler cancel = (_, e) => { e.Cancel = true; stop.Set(); };
-        Console.CancelKeyPress += cancel;
+        if (!hidden) Console.CancelKeyPress += cancel;
         using var operation = new Mutex(false, @"Local\MxThumbWheelReader.Operation");
         var store = new AppSettingsStore();
         int? previous = null;
@@ -76,6 +83,10 @@ internal sealed class WatchRunner
             Console.Error.WriteLine($"Nelze přihlásit odběr událostí Windows: {ex.Message}");
             return 6;
         }
-        finally { Console.CancelKeyPress -= cancel; single.ReleaseMutex(); }
+        finally { if (!hidden) Console.CancelKeyPress -= cancel; single.ReleaseMutex(); }
     }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool FreeConsole();
 }
