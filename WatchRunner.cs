@@ -29,6 +29,7 @@ internal sealed class WatchRunner
         int exitCode = 0;
         try
         {
+            using var tray = hidden ? new WatchTray(() => stop.Set()) : null;
             using var events = new ConnectionEvents(() => changed.Set());
             Console.WriteLine("Čekám na události Bluetooth / HID / probuzení. Bez periodických dotazů. Ctrl+C ukončí hlídání.");
             new EventReconciler().Run(stop, changed, () =>

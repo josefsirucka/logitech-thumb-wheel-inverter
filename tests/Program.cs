@@ -62,3 +62,16 @@ using (var exhausted = new ManualResetEvent(false))
     finally { stop.Set(); Check(task.Wait(3000), "Offline shutdown blocked"); }
 }
 Console.WriteLine("PASS: event wakeup, no idle polling, bounded readiness retries, interruptible shutdown.");
+
+using (var stop = new ManualResetEvent(false))
+using (var changed = new AutoResetEvent(false))
+{
+    var task = Task.Run(() => new EventReconciler().Run(stop, changed, () => 0, _ => { }));
+    using (var tray = new WatchTray(() => stop.Set()))
+    {
+        Check(!stop.WaitOne(100), "Tray stopped watcher during startup");
+        tray.ClickExit();
+        Check(task.Wait(3000), "Tray Exit did not stop watcher");
+    }
+}
+Console.WriteLine("PASS: tray Exit stops watcher and UI thread disposes cleanly.");

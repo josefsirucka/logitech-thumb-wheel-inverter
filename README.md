@@ -21,6 +21,8 @@ Pro sestavení je potřeba přístup k NuGetu kvůli balíčku HidSharp. Myš mu
 
 ## Automatická obnova přes Bluetooth bez pravidelných dotazů (od v1.2.0)
 
+Od v1.2.2 má skryté hlídání ikonu **MX Thumb Wheel** v systémové liště vedle hodin (případně pod šipkou skrytých ikon). Pravé tlačítko → **Ukončit** zastaví hlídání a odstraní ikonu. Aktuální směr myši ani uložená preference se tím nemění. Automatické spuštění při příštím přihlášení zůstává zapnuté; pro trvalé vypnutí použijte `Uninstall-Startup.ps1`. Pro opětovné spuštění nyní lze znovu spustit `Install-Startup.ps1`. Ikona používá události Windows, žádný periodický časovač. Release obsahuje i potřebný Windows Desktop runtime.
+
 Rozbalte ZIP do trvalé zapisovatelné složky. Pro obrácený směr spusťte:
 
 ```powershell
@@ -32,7 +34,7 @@ První příkaz uloží požadavek i při odpojené myši (v tom případě vrá
 
 Pro ruční hlídání v konzoli spusťte `.\MxThumbWheelReader.exe --watch`; ukončení je Ctrl+C. Pro odstranění automatického spouštění spusťte `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Uninstall-Startup.ps1`.
 
-Od v1.2.1 instalační skript spouští proces bez konzole, takže nemá okno ani položku na hlavním panelu. Volba `--watch --hidden` navíc odpojí konzoli při ručním spuštění; takový proces lze ukončit ve Správci úloh. Pro běžný provoz použijte instalační skript. Hlídání nadále čeká na události Windows bez pravidelných dotazů.
+Od v1.2.1 instalační skript spouští proces bez konzole, takže nemá okno ani položku na hlavním panelu. Volba `--watch --hidden` navíc odpojí konzoli při ručním spuštění; od v1.2.2 ho ukončíte přes ikonu v systémové liště. Pro běžný provoz použijte instalační skript. Hlídání nadále čeká na události Windows bez pravidelných dotazů.
 
 Aktualizace na v1.2.1: ve staré složce spusťte `Uninstall-Startup.ps1`, ruční hlídání ukončete Ctrl+C, nahraďte soubory novým ZIPem (zachovejte svůj `appsettings.json`) a znovu spusťte `Install-Startup.ps1`. Při instalaci do nové složky do ní přeneste svůj `appsettings.json`.
 
