@@ -32,7 +32,28 @@ public sealed class LogitechReader
 
     public int Run(string[] args)
     {
-        Console.OutputEncoding = Encoding.UTF8;
+        if (args.Length == 1 && args[0].Trim().TrimStart('-').Equals("watch", StringComparison.OrdinalIgnoreCase))
+            return new WatchRunner().Run();
+        using var mutex = new Mutex(false, @"Local\MxThumbWheelReader.Operation");
+        bool acquired = false;
+        try
+        {
+            try { acquired = mutex.WaitOne(TimeSpan.FromSeconds(60)); }
+            catch (AbandonedMutexException) { acquired = true; }
+            if (!acquired) { Console.Error.WriteLine("Jiná instance právě komunikuje s myší."); return 7; }
+            return RunOnce(args);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or TimeoutException)
+        {
+            Console.Error.WriteLine(ex.Message);
+            return 6;
+        }
+        finally { if (acquired) mutex.ReleaseMutex(); }
+    }
+
+    internal int RunOnce(string[] args, bool watch = false)
+    {
+        if (!watch) Console.OutputEncoding = Encoding.UTF8;
 
         ThumbWheelCommand? command = ParseCommand(args);
 
@@ -66,13 +87,31 @@ public sealed class LogitechReader
                 ? savedSettings.Mouse
                 : null;
 
+        if (watch)
+        {
+            if (!savedSettings.DesiredDirectionInverted.HasValue) return 8;
+            command = savedSettings.DesiredDirectionInverted.Value
+                ? ThumbWheelCommand.Inverted : ThumbWheelCommand.Normal;
+        }
+        else if (command != ThumbWheelCommand.Status)
+        {
+            savedSettings.DesiredDirectionInverted = command == ThumbWheelCommand.Inverted;
+            settingsStore.Save(savedSettings);
+            Console.WriteLine("Požadovaný směr uložen i pro příští připojení. Pro automatickou obnovu spusťte --watch.");
+        }
+
         HidDevice[] devices = DeviceList.Local
             .GetHidDevices(LogitechVendorId)
+            .Where(device => !watch || preferredMouse is null ||
+                device.ProductID == preferredMouse.ProductId)
             .OrderByDescending(device =>
                 preferredMouse is not null &&
                 device.ProductID == preferredMouse.ProductId &&
                 device.DevicePath == preferredMouse.DevicePath)
             .ToArray();
+
+        if (watch && preferredMouse is not null && devices.Any(d => d.DevicePath == preferredMouse.DevicePath))
+            devices = devices.Where(d => d.DevicePath == preferredMouse.DevicePath).ToArray();
 
         if (devices.Length == 0)
         {
@@ -123,6 +162,7 @@ public sealed class LogitechReader
                     ? new[] { preferredMouse.DeviceIndex }.Concat(DeviceIndices).Distinct()
                     : DeviceIndices;
 
+                if (watch && preferredMouse is not null) indices = new[] { preferredMouse.DeviceIndex };
                 foreach (byte deviceIndex in indices)
                 {
                     ThumbWheelResult? currentState = TryReadThumbWheel(
@@ -631,6 +671,7 @@ public sealed class LogitechReader
         Console.WriteLine("  MxThumbWheelReader.exe --status");
         Console.WriteLine("  MxThumbWheelReader.exe --normal");
         Console.WriteLine("  MxThumbWheelReader.exe --inverted");
+        Console.WriteLine("  MxThumbWheelReader.exe --watch");
         Console.WriteLine();
         Console.WriteLine("Příkazy fungují i bez předpony --.");
     }

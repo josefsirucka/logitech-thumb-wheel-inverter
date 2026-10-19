@@ -19,7 +19,26 @@ Při `dotnet run` je soubor v `bin\Debug\net10.0-windows\appsettings.json`. Po p
 
 Pro sestavení je potřeba přístup k NuGetu kvůli balíčku HidSharp. Myš musí být probuzená a připojená. Program vybere první zařízení, které odpoví s feature `0x2150`.
 
-## GitHub Release
+## Automatická obnova po připojení a restartu (od v1.1.0)
+
+Rozbalte ZIP do trvalé zapisovatelné složky. Pro obrácený směr spusťte:
+
+```powershell
+.\MxThumbWheelReader.exe --inverted
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Install-Startup.ps1
+```
+
+První příkaz uloží požadavek i při odpojené myši (v tom případě vrátí nenulový kód kvůli nedostupnému zařízení). Instalační skript spustí hlídání skrytě a zaregistruje úlohu pro přihlášení aktuálního uživatele. Při restartu PC se tedy obnoví po přihlášení. Složku pak nepřesouvejte. Pokud zásady Windows registraci úlohy zakážou, skript vypíše chybu.
+
+Pro ruční hlídání v konzoli spusťte `.\MxThumbWheelReader.exe --watch`; ukončení je Ctrl+C. Pro odstranění automatického spouštění spusťte `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Uninstall-Startup.ps1`.
+
+Požadovaný směr je uložen zvlášť v `DesiredDirectionInverted`. Příkaz `--status` ho nepřepíše. Při aktualizaci ze starší verze zvolte jednou `--inverted` nebo `--normal`; stará naměřená hodnota se automaticky nepovažuje za požadavek.
+
+Hlídání kontroluje stav ve výchozím nastavení každých 5 sekund. Mezi kontrolami proces spí; při chybě nebo odpojení interval prodlužuje na 10, 20 a nejvýše 30 sekund. Obnova po návratu myši proto může chvíli trvat. `WatchIntervalSeconds` lze zvýšit (rozsah 5–300 sekund). Delší interval snižuje počet HID dotazů a prodlužuje reakci. Zápis do myši probíhá jen při odchylce, konfigurace se zapisuje jen při změně a konzole hlásí jen změny dostupnosti. Konkrétní spotřeba CPU a vliv na baterii závisí na zařízení; na fyzické myši je nutné je ověřit.
+
+Známé zařízení se hledá přednostně podle uložené HID cesty, PID a indexu. Při novém párování nebo výměně receiveru obnovte identifikaci příkazem `--status`. Pokud směr spravuje současně jiný program, může jej přepisovat.
+
+## Vytvoření dalšího GitHub Release
 
 Tento adresář nahrajte jako **kořen samostatného GitHub repozitáře**, včetně skryté složky `.github`. První nahrání proveďte například takto (doplňte URL svého repozitáře):
 

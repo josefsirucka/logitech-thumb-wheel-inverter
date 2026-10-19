@@ -29,14 +29,19 @@ internal sealed class AppSettingsStore
 
     public void Save(MouseSettings mouse)
     {
-        var settings = new AppSettings
-        {
-            ComputerName = Environment.MachineName,
-            Mouse = mouse
-        };
+        var settings = Load();
+        settings.ComputerName = Environment.MachineName;
+        settings.Mouse = mouse;
+        Save(settings);
+    }
+
+    public void Save(AppSettings settings)
+    {
 
         string temporaryPath = _path + ".tmp";
-        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(settings, JsonOptions));
+        string json = JsonSerializer.Serialize(settings, JsonOptions);
+        if (File.Exists(_path) && File.ReadAllText(_path) == json) return;
+        File.WriteAllText(temporaryPath, json);
         File.Move(temporaryPath, _path, overwrite: true);
     }
 
@@ -47,6 +52,8 @@ internal sealed class AppSettings
 {
     public string ComputerName { get; set; } = "";
     public MouseSettings? Mouse { get; set; }
+    public bool? DesiredDirectionInverted { get; set; }
+    public int WatchIntervalSeconds { get; set; } = 5;
 }
 
 internal sealed class MouseSettings

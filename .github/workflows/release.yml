@@ -17,6 +17,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Check reconnect behavior with simulated HID
+        shell: pwsh
+        run: dotnet run --project tests/BehaviorTests.csproj --configuration Release
+
       - name: Publish Windows executable
         shell: pwsh
         run: |
@@ -43,7 +47,7 @@ jobs:
             }
           }
           $asset = Join-Path $PWD "dist/MxThumbWheelReader-$env:GITHUB_REF_NAME-win-x64.zip"
-          Compress-Archive -LiteralPath @($exe, $settings, (Join-Path $PWD 'README.md')) -DestinationPath $asset
+          Compress-Archive -LiteralPath @($exe, $settings, (Join-Path $PWD 'README.md'), (Join-Path $PWD 'Install-Startup.ps1'), (Join-Path $PWD 'Uninstall-Startup.ps1')) -DestinationPath $asset
           "RELEASE_ASSET=$asset" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Publish GitHub Release
