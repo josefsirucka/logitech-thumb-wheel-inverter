@@ -14,5 +14,6 @@
     <Compile Include="../WatchTray.cs" Link="WatchTray.cs" />
     <Compile Include="../EventReconciler.cs" Link="EventReconciler.cs" />
     <Compile Include="../ConnectionEvents.cs" Link="ConnectionEvents.cs" />
+    <EmbeddedResource Include="../assets/mouse.ico" LogicalName="MxThumbWheelReader.MouseIcon" />
   </ItemGroup>
 </Project>

@@ -25,9 +25,12 @@ internal sealed class WatchTray : IDisposable
                 exit = new ToolStripMenuItem("Ukončit");
                 exit.Click += (_, _) => { exit.Enabled = false; stop(); };
                 menu.Items.Add(exit);
+                using var iconStream = typeof(WatchTray).Assembly.GetManifestResourceStream("MxThumbWheelReader.MouseIcon")
+                    ?? throw new InvalidOperationException("Chybí vložená ikona myši.");
+                using var mouseIcon = new System.Drawing.Icon(iconStream, SystemInformation.SmallIconSize);
                 using var icon = new NotifyIcon
                 {
-                    Icon = System.Drawing.SystemIcons.Application,
+                    Icon = mouseIcon,
                     Text = "MX Thumb Wheel – hlídání",
                     ContextMenuStrip = menu,
                     Visible = true

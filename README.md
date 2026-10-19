@@ -23,6 +23,8 @@ Pro sestavení je potřeba přístup k NuGetu kvůli balíčku HidSharp. Myš mu
 
 Od v1.2.2 má skryté hlídání ikonu **MX Thumb Wheel** v systémové liště vedle hodin (případně pod šipkou skrytých ikon). Pravé tlačítko → **Ukončit** zastaví hlídání a odstraní ikonu. Aktuální směr myši ani uložená preference se tím nemění. Automatické spuštění při příštím přihlášení zůstává zapnuté; pro trvalé vypnutí použijte `Uninstall-Startup.ps1`. Pro opětovné spuštění nyní lze znovu spustit `Install-Startup.ps1`. Ikona používá události Windows, žádný periodický časovač. Release obsahuje i potřebný Windows Desktop runtime.
 
+Od v1.2.3 používá lišta i EXE vlastní ikonu myši. Ikona je vložená přímo do aplikace v několika velikostech pro různé DPI; vedle EXE nejsou potřeba žádné další obrázky.
+
 Rozbalte ZIP do trvalé zapisovatelné složky. Pro obrácený směr spusťte:
 
 ```powershell
