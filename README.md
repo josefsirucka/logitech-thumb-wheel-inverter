@@ -15,11 +15,11 @@ Staženou aplikaci lze spustit například `.\MxThumbWheelReader.exe --status`. 
 
 Při prvním úspěšném čtení aplikace uloží název počítače, VID/PID, název zařízení, HID cestu, index zařízení a aktuální směr do `appsettings.json` vedle spuštěného programu. Při dalším spuštění zkusí tento záznam přednostně; pokud cesta už neplatí, znovu prohledá Logitech HID zařízení. Nové úspěšné čtení záznam aktualizuje.
 
-Při `dotnet run` je soubor v `bin\Debug\net10.0-windows\appsettings.json`. Po publikování je vedle `.exe`. Proces musí mít právo do této složky zapisovat. Zdrojový `appsettings.json` je prázdná šablona, která se kopíruje do výstupní složky sestavení.
+Při `dotnet run` je soubor v `bin\Debug\net10.0-windows10.0.19041.0\appsettings.json`. Po publikování je vedle `.exe`. Proces musí mít právo do této složky zapisovat. Zdrojový `appsettings.json` je prázdná šablona, která se kopíruje do výstupní složky sestavení.
 
 Pro sestavení je potřeba přístup k NuGetu kvůli balíčku HidSharp. Myš musí být probuzená a připojená. Program vybere první zařízení, které odpoví s feature `0x2150`.
 
-## Automatická obnova po připojení a restartu (od v1.1.0)
+## Automatická obnova přes Bluetooth bez pravidelných dotazů (od v1.2.0)
 
 Rozbalte ZIP do trvalé zapisovatelné složky. Pro obrácený směr spusťte:
 
@@ -34,7 +34,13 @@ Pro ruční hlídání v konzoli spusťte `.\MxThumbWheelReader.exe --watch`; uk
 
 Požadovaný směr je uložen zvlášť v `DesiredDirectionInverted`. Příkaz `--status` ho nepřepíše. Při aktualizaci ze starší verze zvolte jednou `--inverted` nebo `--normal`; stará naměřená hodnota se automaticky nepovažuje za požadavek.
 
-Hlídání kontroluje stav ve výchozím nastavení každých 5 sekund. Mezi kontrolami proces spí; při chybě nebo odpojení interval prodlužuje na 10, 20 a nejvýše 30 sekund. Obnova po návratu myši proto může chvíli trvat. `WatchIntervalSeconds` lze zvýšit (rozsah 5–300 sekund). Delší interval snižuje počet HID dotazů a prodlužuje reakci. Zápis do myši probíhá jen při odchylce, konfigurace se zapisuje jen při změně a konzole hlásí jen změny dostupnosti. Konkrétní spotřeba CPU a vliv na baterii závisí na zařízení; na fyzické myši je nutné je ověřit.
+Hlídání reaguje na oznámení Windows o připojení spárovaného Bluetooth zařízení, objevení Logitech HID rozhraní, probuzení počítače a na ruční příkazy programu. Používá DeviceWatcher se stavem System.Devices.Aep.IsConnected pro spárované Bluetooth/BLE endpointy a oznámení Windows o probuzení. Nespouští vyhledávání nespárovaných zařízení ani periodické HID dotazy. Oznámení o jiném spárovaném Bluetooth zařízení může také vyvolat kontrolu uložené myši.
+
+Při spuštění a po události zkusí ihned obnovit požadovaný směr. Pokud rozhraní ještě není připravené, následují nejvýše tři další pokusy s prodlevami 250 ms, 750 ms a 2 s. Po úspěchu nebo vyčerpání pokusů čeká neomezeně na další událost; není zde pravidelný ping ani kontrolní časovač. Původní WatchIntervalSeconds se ignoruje. Samotná HID komunikace má své timeouty, takže okamžitou reakci před zpřístupněním spojení Windows nelze garantovat. Když firmware resetuje nastavení bez události připojení/probuzení nebo je přepíše jiný program, tato verze změnu průběžně nezjišťuje.
+
+Událostní hlídání je určeno pro přímé Bluetooth na Windows 10 verze 2004 nebo novějších a Windows 11 (x64). Bezdrátové připojení myši za trvale zapojeným USB receiverem vyžaduje jiný typ oznámení; tuto variantu --watch odmítne, pokud je rozpoznaná v konfiguraci. Jednorázové příkazy zůstávají použitelné i přes receiver. Balíček obsahuje vlastní .NET runtime.
+
+Při aktualizaci z v1.1.0 nejdřív spusťte Uninstall-Startup.ps1 ve staré složce, případný ruční --watch ukončete Ctrl+C, rozbalte nový ZIP a zopakujte oba instalační příkazy výše. Tím zabráníte tomu, aby zůstal spuštěný starý proces s periodickým dotazováním.
 
 Známé zařízení se hledá přednostně podle uložené HID cesty, PID a indexu. Při novém párování nebo výměně receiveru obnovte identifikaci příkazem `--status`. Pokud směr spravuje současně jiný program, může jej přepisovat.
 

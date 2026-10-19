@@ -53,7 +53,6 @@ internal sealed class AppSettings
     public string ComputerName { get; set; } = "";
     public MouseSettings? Mouse { get; set; }
     public bool? DesiredDirectionInverted { get; set; }
-    public int WatchIntervalSeconds { get; set; } = 5;
 }
 
 internal sealed class MouseSettings

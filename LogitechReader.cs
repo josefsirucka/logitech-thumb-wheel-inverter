@@ -41,7 +41,10 @@ public sealed class LogitechReader
             try { acquired = mutex.WaitOne(TimeSpan.FromSeconds(60)); }
             catch (AbandonedMutexException) { acquired = true; }
             if (!acquired) { Console.Error.WriteLine("Jiná instance právě komunikuje s myší."); return 7; }
-            return RunOnce(args);
+            int result = RunOnce(args);
+            using var changed = new EventWaitHandle(false, EventResetMode.AutoReset, WatchRunner.ChangedEventName);
+            changed.Set();
+            return result;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or TimeoutException)
         {
@@ -162,7 +165,7 @@ public sealed class LogitechReader
                     ? new[] { preferredMouse.DeviceIndex }.Concat(DeviceIndices).Distinct()
                     : DeviceIndices;
 
-                if (watch && preferredMouse is not null) indices = new[] { preferredMouse.DeviceIndex };
+                if (watch) indices = new[] { preferredMouse?.DeviceIndex ?? (byte)0xFF };
                 foreach (byte deviceIndex in indices)
                 {
                     ThumbWheelResult? currentState = TryReadThumbWheel(
